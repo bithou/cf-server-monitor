@@ -441,8 +441,17 @@
       <div id="copyModal" class="modal-overlay" :class="{ active: showCopyModal }">
         <div class="modal-dialog">
           <div class="modal-header">
-            <div class="modal-title">$ curl -sL {{ API_BASE }}/install.sh | bash -s install</div>
+            <div class="modal-title">bash -s install</div>
             <button class="modal-close" @click="closeCopyModal">✕</button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">{{ trans.targetOs }}</label>
+            <select v-model="targetOs" class="form-select">
+              <option value="linux">Linux (Ubuntu/Debian/CentOS)</option>
+              <option value="alpine">Alpine Linux</option>
+              <option value="windows">Windows</option>
+            </select>
           </div>
 
           <div class="form-group">
@@ -631,6 +640,7 @@ const dbResult = ref(null)
 
 const showCopyModal = ref(false)
 const copyServerId = ref('')
+const targetOs = ref('linux')
 const reportInterval = ref(60)
 const pingMode = ref('http')
 const copiedCmd = ref(false)
@@ -885,6 +895,7 @@ const getUninstallCommand = () => {
 
 const copyCmd = (serverId) => {
   copyServerId.value = serverId
+  targetOs.value = 'linux'
   reportInterval.value = 60
   pingMode.value = 'http'
   copiedCmd.value = false
@@ -893,7 +904,12 @@ const copyCmd = (serverId) => {
 
 const getCustomInstallCommand = () => {
   const HOST = API_BASE
-  return `curl -sL ${HOST}/install.sh | bash -s install ${copyServerId.value} ${apiSecret.value} ${HOST}/update ${reportInterval.value} ${pingMode.value}`
+  if (targetOs.value === 'windows') {
+    return `${HOST}/cf-server-monitor.pyw`
+  }
+  const shell = targetOs.value === 'alpine' ? 'sh' : 'bash'
+  const script = targetOs.value === 'alpine' ? 'install-alpine.sh' : 'install.sh'
+  return `curl -sL ${HOST}/${script} | ${shell} -s install ${copyServerId.value} ${apiSecret.value} ${HOST}/update ${reportInterval.value} ${pingMode.value}`
 }
 
 const copyCustomCmd = async () => {
