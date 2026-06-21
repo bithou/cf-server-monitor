@@ -4,7 +4,7 @@
   "description": "Cloudflare Workers Server Monitor - 多服务器监控探针",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --ip 0.0.0.0",
     "deploy": "wrangler deploy",
     "tail": "wrangler tail",
     "dev:frontend": "vite",
